@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Разбор задач по Python · многостраничник</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root{
+    --bg: #eef2f9;
+    --card: #ffffff;
+    --ink: #0f172a;
+    --muted: #475569;
+    --line: #e2e8f0;
+    --brand: #3b82f6;
+    --brand-d: #1d4ed8;
+    --ok: #10b981;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --code: #0f172a;
+    --code-ink: #e2e8f0;
+  }
+  body{
+    font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  header{
+    background: linear-gradient(120deg, #1e3a8a, #3b82f6);
+    color: #fff;
+    padding: 1.6rem 2rem;
+    box-shadow: 0 6px 20px -10px rgba(0,0,0,.4);
+  }
+  header h1{ font-size: 1.6rem; letter-spacing: -.4px; }
+  header p{ opacity: .9; font-size: .98rem; }
+
+  nav{
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    background: #fff;
+    padding: .7rem 1.2rem;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 4px 14px -12px rgba(0,0,0,.3);
+  }
+  nav button{
+    border: 1px solid var(--line);
+    background: #f8fafc;
+    color: var(--ink);
+    padding: .5rem .95rem;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: .9rem;
+    font-weight: 600;
+    transition: all .18s ease;
+    user-select: none;
+  }
+  nav button:hover{ background: #e0edff; border-color: var(--brand); }
+  nav button.active{
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+  }
+
+  main{ flex: 1; max-width: 980px; width: 100%; margin: 0 auto; padding: 2rem 1.2rem 3rem; }
+  section.page{ display: none; animation: fade .25s ease; }
+  section.page.active{ display: block; }
+  @keyframes fade{ from{opacity:0; transform: translateY(6px);} to{opacity:1; transform:none;} }
+
+  h2{
+    font-size: 1.7rem;
+    margin-bottom: .4rem;
+    color: var(--ink);
+    display: flex; align-items: center; gap: .6rem;
+    flex-wrap: wrap;
+  }
+  h2 .tag{
+    background: var(--brand);
+    color: #fff;
+    font-size: .8rem;
+    padding: .15rem .7rem;
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: .3px;
+  }
+  h3{ font-size: 1.25rem; margin: 1.6rem 0 .6rem; }
+  h4{ font-size: 1.05rem; margin: 1rem 0 .4rem; color: var(--brand-d); }
+  p{ margin-bottom: .7rem; }
+  .lead{ color: var(--muted); margin-bottom: 1.4rem; }
+
+  .card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 1.4rem 1.6rem;
+    margin: 1.1rem 0;
+    box-shadow: 0 12px 28px -22px rgba(15,23,42,.25);
+  }
+  .card.big{ border-left: 6px solid var(--brand); }
+  .card.try{ border-left: 6px solid var(--danger); background: #fff5f5; }
+  .card.ok{ border-left: 6px solid var(--ok); background: #f0fdf4; }
+
+  /* ==== Блок кода — защищённый ==== */
+  .code{
+    background: var(--code);
+    color: var(--code-ink);
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    font-family: 'JetBrains Mono','Fira Code',Consolas,monospace;
+    font-size: .92rem;
+    line-height: 1.55;
+    overflow-x: auto;
+    white-space: pre;
+    margin: .7rem 0;
+    position: relative;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    cursor: default;
+  }
+  /* Полупрозрачная метка поверх кода */
+  .code::after{
+    content: "🔒 код только для чтения";
+    position: absolute;
+    top: .4rem;
+    right: .6rem;
+    font-size: .7rem;
+    color: #64748b;
+    font-family: 'Segoe UI', sans-serif;
+    background: rgba(15,23,42,.85);
+    padding: .1rem .5rem;
+    border-radius: 6px;
+    pointer-events: none;
+  }
+  .code .cm{ color: #94a3b8; }
+  .code .kw{ color: #f472b6; }
+  .code .st{ color: #a5d6ff; }
+  .code .nm{ color: #fbbf24; }
+  .code .fn{ color: #7dd3fc; }
+
+  .step{ display: flex; gap: 1rem; margin: 1.1rem 0; align-items: flex-start; }
+  .step .num{
+    background: var(--brand);
+    color: #fff;
+    min-width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.05rem;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .step .body{ flex: 1; }
+  .step .body p:last-child{ margin-bottom: 0; }
+
+  .hint{
+    background: #fef9e7;
+    border-left: 6px solid var(--warn);
+    padding: 1rem 1.2rem;
+    border-radius: 12px;
+    color: #78350f;
+    margin: 1.1rem 0;
+  }
+  .hint strong{ color: #b45309; }
+
+  ul, ol{ padding-left: 1.5rem; margin: .5rem 0 .9rem; }
+  li{ margin-bottom: .3rem; }
+
+  code.inl{
+    background: #eef2f6;
+    padding: .1rem .45rem;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .88em;
+    color: #0f172a;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .badge{
+    display: inline-block;
+    background: #dbeafe;
+    color: #1e40af;
+    font-size: .78rem;
+    padding: .15rem .6rem;
+    border-radius: 999px;
+    font-weight: 700;
+    margin-bottom: .4rem;
+    user-select: none;
+  }
+  .badge.red{ background: #fee2e2; color: #991b1b; }
+  .badge.green{ background: #dcfce7; color: #166534; }
+
+  table{ width: 100%; border-collapse: collapse; margin: .8rem 0; font-size: .95rem; }
+  th, td{ border: 1px solid var(--line); padding: .55rem .7rem; text-align: left; vertical-align: top; }
+  th{ background: #f1f5f9; }
+
+  details summary{ user-select: none; }
+
+  footer{
+    text-align: center;
+    padding: 1.2rem;
+    color: var(--muted);
+    font-size: .88rem;
+    border-top: 1px solid var(--line);
+    background: #fff;
+  }
+
+  @media (max-width: 600px){
+    header{ padding: 1.2rem; }
+    header h1{ font-size: 1.25rem; }
+    main{ padding: 1.4rem .9rem 2.4rem; }
+    h2{ font-size: 1.35rem; }
+    .code{ font-size: .82rem; padding: .8rem; }
+    .card{ padding: 1.1rem 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧠 Разбор задач по Python</h1>
+  <p>Многостраничник: try/except — подробно, остальное — по шагам и по делу.</p>
+</header>
+
+<nav id="nav">
+  <button data-page="intro" class="active">Старт</button>
+  <button data-page="try">🔥 try/except</button>
+  <button data-page="p12">1.2 Кошка</button>
+  <button data-page="p13">1.3 Билеты</button>
+  <button data-page="p14">1.4 Минимум</button>
+  <button data-page="p15">1.5 Треугольник</button>
+  <button data-page="p16">1.6 Сумма</button>
+  <button data-page="p17">1.7 Угадайка</button>
+  <button data-page="p18">1.8 Рандом</button>
+  <button data-page="p22">2.2 Факты+время</button>
+</nav>
+
+<main>
+
+<!-- ================= СТАРТ ================= -->
+<section id="intro" class="page active">
+  <h2><span class="tag">Старт</span> Как пользоваться сайтом</h2>
+  <p class="lead">Сверху — кнопки страниц. Каждая страница = одна задача или одна тема.</p>
+
+  <div class="card big">
+    <h3>Порядок работы</h3>
+    <ol>
+      <li>Сначала открой страницу <strong>«try/except»</strong> — там база, без неё многие задачи непонятны.</li>
+      <li>Потом иди по задачам: 1.2 → 1.3 → … → 2.2.</li>
+      <li>На каждой странице есть <strong>разбор по шагам</strong> и маленькая <strong>подсказка-проверка</strong>. Попробуй сначала ответить сама, потом смотри решение.</li>
+    </ol>
+  </div>
+
+  <div class="hint">
+    <strong>💡 Правило:</strong> код со страницы скопировать нельзя — набери его сама по шагам. Так запоминается лучше всего.
+  </div>
+</section>
+
+<!-- ================= TRY/EXCEPT ================= -->
+<section id="try" class="page">
+  <h2><span class="tag">Тема</span> try / except — большая ловушка для ошибок</h2>
+  <p class="lead">Это самая важная тема для всех «викторин» в задачах. Разбираем максимально подробно.</p>
+
+  <div class="card big">
+    <h3>Зачем это вообще нужно?</h3>
+    <p>Функция <code class="inl">input()</code> возвращает <strong>строку</strong>. Даже если ты введёшь <code class="inl">3</code>, это будет строка <code class="inl">'3'</code>, а не число.</p>
+    <p>Чтобы сравнить ответ с числом, строку превращают в число через <code class="inl">int()</code>. Но если пользователь введёт «три» или «3,5», <code class="inl">int()</code> <strong>падает с ошибкой</strong> — программа ломается. Вот тут и спасает <code class="inl">try/except</code>.</p>
+  </div>
+
+  <h3>🔍 Мини-пример: как это работает</h3>
+
+  <div class="step">
+    <div class="num">1</div>
+    <div class="body">
+      <p><strong>Проблема:</strong> без защиты.</p>
+      <div class="code">a = int(input('Сторона квадрата:'))
+print('Периметр:', a * 4)</div>
+      <p>Если пользователь введёт <code class="inl">5</code> — всё ок. Если <code class="inl">пять</code> — программа «упадёт» с красной ошибкой. Это плохо.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">2</div>
+    <div class="body">
+      <p><strong>Решение:</strong> оборачиваем опасный код в <code class="inl">try</code>.</p>
+      <div class="code">while True:
+   try:
+       a = int(input('Сторона квадрата:'))
+       break
+   except:
+       print('Ошибка! Введите число без других символов')
+perimeter = a * 4
+print('Периметр квадрата:', perimeter)</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">3</div>
+    <div class="body">
+      <p><strong>Что происходит по шагам:</strong></p>
+      <table>
+        <tr><th>Строка</th><th>Действие</th></tr>
+        <tr><td><code class="inl">while True:</code></td><td>Бесконечный цикл. Пока не выйдем через <code class="inl">break</code>.</td></tr>
+        <tr><td><code class="inl">try:</code></td><td>Начало «безопасной зоны». Всё внутри мы пытаемся выполнить.</td></tr>
+        <tr><td><code class="inl">a = int(input(...))</code></td><td>Пытаемся прочитать строку и превратить её в целое число.</td></tr>
+        <tr><td><code class="inl">break</code></td><td>Если получилось — выходим из цикла. Число надёжно сохранено в <code class="inl">a</code>.</td></tr>
+        <tr><td><code class="inl">except:</code></td><td>Если <code class="inl">int()</code> не смог — управление прыгает сюда. Печатаем подсказку. Цикл идёт на новый круг.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="hint">
+    <strong>💡 Главная мысль:</strong> <code class="inl">try</code> — «попробуй», <code class="inl">except</code> — «а если не вышло, сделай вот это». <code class="inl">break</code> живёт <em>внутри</em> <code class="inl">try</code>, чтобы выйти из цикла <strong>только когда ошибок не было</strong>.
+  </div>
+
+  <h3>🧩 Как это встроено в викторины</h3>
+
+  <div class="step">
+    <div class="num">1</div>
+    <div class="body">
+      <p>В задачах-викторинах структура почти всегда одинаковая:</p>
+      <div class="code">while True:
+   try:
+       answer = int(input())
+       break
+   except:
+       print('Ошибка! Введите номер правильного ответа')</div>
+      <p>Читается так: «Пока не получим нормальный номер — проси ввести заново».</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">2</div>
+    <div class="body">
+      <p><strong>Почему <code class="inl">while True</code> именно бесконечный?</strong> Потому что мы не знаем заранее, сколько раз пользователь ошибётся. <code class="inl">break</code> — единственный выход. Это стандартный «паттерн» для ввода с проверкой.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">3</div>
+    <div class="body">
+      <p><strong>Что попадёт в <code class="inl">except</code>?</strong> Например:</p>
+      <ul>
+        <li>пользователь ввёл буквы — <code class="inl">'abc'</code>;</li>
+        <li>ввёл дробное — <code class="inl">'3.5'</code> (у <code class="inl">int()</code> не пройдёт);</li>
+        <li>просто нажал Enter — пустая строка.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card try">
+    <span class="badge red">Проверь себя</span>
+    <h4>Вопрос:</h4>
+    <p>Почему <code class="inl">break</code> стоит именно после <code class="inl">int(...)</code>, а не до него?</p>
+    <details>
+      <summary style="cursor:pointer; color:#991b1b; font-weight:700;">Показать ответ</summary>
+      <p style="margin-top:.6rem;">Потому что если поставить <code class="inl">break</code> до <code class="inl">int(...)</code>, цикл закончится сразу после ввода строки, ещё до попытки превратить её в число. Тогда ошибка не будет поймана, и <code class="inl">except</code> никогда не сработает. А если <code class="inl">break</code> вообще убрать из <code class="inl">try</code> — цикл будет бесконечным даже при верном ответе.</p>
+    </details>
+  </div>
+
+  <div class="card ok">
+    <span class="badge green">Итог</span>
+    <p>Шаблон для запоминания:</p>
+    <div class="code">while True:
+   try:
+       x = int(input('Введите число: '))
+       break
+   except:
+       print('Ошибка! Введите число без других символов')</div>
+    <p style="margin-top:.5rem;">Дальше можно спокойно пользоваться <code class="inl">x</code> как числом.</p>
+  </div>
+</section>
+
+<!-- ================= 1.2 ================= -->
+<section id="p12" class="page">
+  <h2><span class="tag">1.2</span> Подбор кошки</h2>
+  <p class="lead">Вложенные <code class="inl">if/else</code> + ввод числа.</p>
+
+  <div class="card">
+    <h3>Что делает программа</h3>
+    <ol>
+      <li>Спрашивает про аллергию.</li>
+      <li>Если «да» — сразу советует Канадского сфинкса.</li>
+      <li>Если «нет» — спрашивает про пушистость.</li>
+      <li>Если не хочет пушистую — Шотландская вислоухая.</li>
+      <li>Если хочет — спрашивает цену и по цене советует породу.</li>
+    </ol>
+  </div>
+
+  <h3>🔍 Разбор по шагам</h3>
+
+  <div class="step">
+    <div class="num">1</div>
+    <div class="body">
+      <p><strong>Первый вопрос и первая развилка.</strong></p>
+      <div class="code">allergy = input('У вас есть аллергия? (да/нет)')
+if allergy == 'да':
+   print('Вам подходит Канадский сфинкс')</div>
+      <p>Сравниваем строку с <code class="inl">'да'</code>. Важно: <code class="inl">input()</code> возвращает строку, кавычки нужны.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">2</div>
+    <div class="body">
+      <p><strong>Ветка «нет» — вложенный вопрос.</strong></p>
+      <div class="code">else:
+   wool = input('Хотите пушистую кошку? (да/нет)')
+   if wool == 'нет':
+       print('Может, Шотландская вислоухая?')</div>
+      <p>Второй <code class="inl">if</code> находится <em>внутри</em> <code class="inl">else</code> — это вложенность.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">3</div>
+    <div class="body">
+      <p><strong>Цена и последняя развилка.</strong></p>
+      <div class="code">   else:
+       price = int(input('Введите комфортную цену:'))
+       if price &lt; 10000:
+           print('Оцените Персидского экзота!')
+       else:
+           print('Взгляните на Мейн-кунов!')</div>
+      <p><code class="inl">int()</code> превращает строку в число, чтобы сравнить с 10000.</p>
+    </div>
+  </div>
+
+  <div class="hint">
+    <strong>💡 Подсказка:</strong> обрати внимание на отступы. Каждый <code class="inl">if/else</code> «привязан» к своему уровню. Если сбить отступы — логика сломается.
+  </div>
+
+  <div class="card try">
+    <span class="badge red">Улучшение</span>
+    <p>Что будет, если пользователь введёт цену буквами? Программа упадёт. Как это починить? — Обернуть ввод цены в <code class="inl">try/except</code> (см. страницу «try/except»).</p>
+  </div>
+</section>
+
+<!-- ================= 1.3 ================= -->
+<section id="p13" class="page">
+  <h2><span class="tag">1.3</span> Билеты в кино</h2>
+  <p class="lead">Линейная программа: ввод → подсчёт → вывод.</p>
+
+  <div class="card">
+    <h3>Что делает программа</h3>
+    <p>Спрашивает, сколько взрослых, детей и пожилых. Считает общую стоимость по фиксированным ценам.</p>
+  </div>
+
+  <h3>🔍 Разбор по шагам</h3>
+
+  <div class="step">
+    <div class="num">1</div>
+    <div class="body">
+      <p><strong>Вывод цен (для справки).</strong></p>
+      <div class="code">print('Цена взрослого билета (18-65) - 1500')
+print('Цена детского билета (до 18) - 1100')
+print('Цена билета старшего поколения (после 65) - 900')</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">2</div>
+    <div class="body">
+      <p><strong>Ввод количества.</strong></p>
+      <div class="code">adult_amount = int(input('Всего взрослых'))
+children_amount = int(input('Всего детей'))
+retired_amount = int(input('Всего пожилых'))</div>
+      <p>Каждое значение сразу превращается в число.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">3</div>
+    <div class="body">
+      <p><strong>Формула и вывод.</strong></p>
+      <div class="code">total = adult_amount*1500 + children_amount*1100 + retired_amount*900
+print('К оплате:', total)</div>
+      <p>Сначала умножение, потом сложение — как в математике.</p>
+    </div>
+  </div>
+
+  <div class="card try">
+    <span class="badge red">Проверь себя</span>
+    <p>2 взрослых, 1 ребёнок, 1 пожилой. Сколько получится? Посчитай в голове, потом проверь кодом.</p>
+    <details><summary style="cursor:pointer;color:#991b1b;font-weight:700;">Ответ</summary>
+      <p style="margin-top:.5rem;">2·1500 + 1·1100 + 1·900 = 3000 + 1100 + 900 = <strong>5000</strong>.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ================= 1.4 ================= -->
+<section id="p14" class="page">
+  <h2><span class="tag">1.4</span> Наименьшее из трёх</h2>
+  <p class="lead">Три независимых <code class="inl">if</code> — обрати внимание, что это не <code class="inl">elif</code>.</p>
+
+  <h3>🔍 Разбор по шагам</h3>
+
+  <div class="step">
+    <div class="num">1</div>
+    <div class="body">
+      <p><strong>Ввод трёх чисел.</strong></p>
+      <div class="code">a = int(input('Первое число'))
+b = int(input('Второе число'))
+c = int(input('Третье число'))</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">2</div>
+    <div class="body">
+      <p><strong>Проверяем каждое число отдельно.</strong></p>
+      <div class="code">if a &lt;= b and a &lt;= c:
+   print('Первое - наименьшее')
+if b &lt;= c and b &lt;= a:
+   print('Второе - наименьшее')
+if c &lt;= a and c &lt;= b:
+   print('Третье - наименьшее')</div>
+      <p>Каждое <code class="inl">if</code> проверяет: «это число меньше или равно двум другим?»</p>
+    </div>
+  </div>
+
+  <div class="hint">
+    <strong>💡 Зачем <code class="inl">&lt;=</code>, а не <code class="inl">&lt;</code>?</strong> Чтобы при равных числах (например, 5, 5, 7) сработало сразу два <code class="inl">if</code> — программа честно скажет, что наименьших несколько.
+  </div>
+
+  <div class="card try">
+    <span class="badge red">Проверь себя</span>
+    <p>Числа 7, 7, 7 — сколько строк выведет программа?</p>
+    <details><summary style="cursor:pointer;color:#991b1b;font-weight:700;">Ответ</summary>
+      <p style="margin-top:.5rem;">Три строки: все три числа являются наименьшими.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ================= 1.5 ================= -->
+<section id="p15" class="page">
+  <h2><span class="tag">1.5</span> Тип треугольника</h2>
+  <p class="lead">Каскад <code class="inl">if / elif / else</code>.</p>
+
+  <h3>🔍 Разбор по шагам</h3>
+
+  <div class="step">
+    <div class="num">1</div>
+    <div class="body">
+      <p><strong>Ввод трёх сторон.</strong></p>
+      <div class="code">a = int(input('Первая сторона:'))
+b = int(input('Вторая сторона:'))
+c = int(input('Третья сторона:'))</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">2</div>
+    <div class="body">
+      <p><strong>Проверка равносторонности.</strong></p>
+      <div class="code">if a == b and a == c:
+   print('Треугольник равносторонний')</div>
+      <p>Если все три равны — дальше проверять нечего. <code class="inl">elif</code> уже не выполнится.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">3</div>
+    <div class="body">
+      <p><strong>Проверка равнобедренности.</strong></p>
+      <div class="code">elif (a == b and a != c) or (b == c and a != c) or (a == c and a != b):
+   print('Треугольник равнобедренный')</div>
+      <p>Три пары в скобках — это «ИЛИ»: хотя бы одна пара сторон должна совпадать. Условие <code class="inl">a != c</code> и т.п. нужно, чтобы исключить уже отловленный равносторонний случай.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">4</div>
+    <div class="body">
+      <p><strong>Всё остальное.</strong></p>
+      <div class="code">else:
+   print('Все стороны имеют разные длины')</div>
+    </div>
+  </div>
+
+  <div class="hint">
+    <strong>💡 Как читать длинное условие:</strong> разбей его на три блока по <code class="inl">or</code>. Первый — a=b, второй — b=c, третий — a=c. Каждый блок — отдельный «шанс» на равнобедренность.
+  </div>
+</section>
+
+<!-- ================= 1.6 ================= -->
+<section id="p16" class="page">
+  <h2><span class="tag">1.6</span> Сумма от 1 до N</h2>
+  <p class="lead">Классический цикл <code class="inl">while</code> с накоплением.</p>
+
+  <h3>🔍 Разбор по шагам</h3>
+
+  <div class="step">
+    <div class="num">1</div>
+    <div class="body">
+      <p><strong>Подготовка.</strong></p>
+      <div class="code">number = int(input('Введите число:'))
+i = 1
+total = 0</div>
+      <ul>
+        <li><code class="inl">i</code> — счётчик, начинается с 1.</li>
+        <li><code class="inl">total</code> — копилка, начинается с 0.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">2</div>
+    <div class="body">
+      <p><strong>Цикл.</strong></p>
+      <div class="code">while i &lt;= number:
+   total += i
+   i += 1</div>
+      <p>Пока счётчик не превысил <code class="inl">number</code>: добавляем его в копилку и увеличиваем на 1.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">3</div>
+    <div class="body">
+      <p><strong>Вывод.</strong></p>
+      <div class="code">print('Сумма чисел от 1 до', number, 'равна', total)</div>
+    </div>
+  </div>
+
+  <div class="hint">
+    <strong>💡 Трассировка для number = 4:</strong><br>
+    i=1: total=1 → i=2 → total=3 → i=3 → total=6 → i=4 → total=10 → i=5 → цикл стоп. Ответ 10.
+  </div>
+</section>
+
+<!-- ================= 1.7 ================= -->
+<section id="p17" class="page">
+  <h2><span class="tag">1.7</span> Угадай число (без рандома)</h2>
+  <p class="lead">Цикл <code class="inl">while</code> с подсказками «больше/меньше».</p>
+
+  <h3>🔍 Разбор по шагам</h3>
+
+  <div class="step">
+    <div class="num">1</div>
+    <div class="body">
+      <p><strong>Загаданное число — фиксированное.</strong></p>
+      <div class="code">my_number = 9
+number = int(input('Я загадала число от 1 до 10. Угадай его:'))</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">2</div>
+    <div class="body">
+      <p><strong>Цикл, пока не угадали.</strong></p>
+      <div class="code">while my_number != number:
+   if my_number &lt; number:
+       number = int(input('Нет, моё число меньше! Попробуй снова:'))
+   else:
+       number = int(input('Нет, моё число больше! Попробуй снова:'))</div>
+      <p>Условие цикла: пока не равно. Внутри — две подсказки и новый ввод.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">3</div>
+    <div class="body">
+      <p><strong>Финал.</strong></p>
+      <div class="code">print('Ты угадал!')</div>
+      <p>Когда цикл завершился, значит <code class="inl">number == my_number</code>.</p>
+    </div>
+  </div>
+
+  <div class="card try">
+    <span class="badge red">Проверь себя</span>
+    <p>Загадано 9. Игрок ввёл 5. Какую подсказку он получит и что произойдёт дальше?</p>
+    <details><summary style="cursor:pointer;color:#991b1b;font-weight:700;">Ответ</summary>
+      <p style="margin-top:.5rem;">5 &lt; 9, значит <code class="inl">my_number &lt; number</code> ложь → сработает <code class="inl">else</code> → «моё число больше!». Игрок вводит новое число.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ================= 1.8 ================= -->
+<section id="p18" class="page">
+  <h2><span class="tag">1.8</span> Угадай число (с рандомом)</h2>
+  <p class="lead">Отличие от 1.7 — одна строчка импорта и генерации.</p>
+
+  <h3>🔍 Разбор по шагам</h3>
+
+  <div class="step">
+    <div class="num">1</div>
+    <div class="body">
+      <p><strong>Импорт и генерация.</strong></p>
+      <div class="code">from random import randint
+my_number = randint(1, 10)</div>
+      <p><code class="inl">randint(1, 10)</code> возвращает случайное целое от 1 до 10 <em>включительно</em>.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">2</div>
+    <div class="body">
+      <p><strong>Дальше — точно как в 1.7.</strong></p>
+      <div class="code">number = int(input('Я загадала число от 1 до 10. Угадай его:'))
+while my_number != number:
+   if my_number &lt; number:
+       number = int(input('Нет, моё число меньше! Попробуй снова:'))
+   else:
+       number = int(input('Нет, моё число больше! Попробуй снова:'))
+print('Ты угадал!')</div>
+    </div>
+  </div>
+
+  <div class="hint">
+    <strong>💡 Важно:</strong> каждый запуск программы загадывает новое число. Чтобы проверить логику подсказок, можно временно вывести <code class="inl">my_number</code> на экран.
+  </div>
+</section>
+
+<!-- ================= 2.2 ================= -->
+<section id="p22" class="page">
+  <h2><span class="tag">2.2</span> Факты о теле + время работы</h2>
+  <p class="lead">Викторина с <code class="inl">try/except</code> и замером времени.</p>
+
+  <div class="card big">
+    <h3>Что делает программа</h3>
+    <ol>
+      <li>Запоминает время старта.</li>
+      <li>Задаёт вопрос и выводит 4 факта.</li>
+      <li>Просит ввести номер через <code class="inl">try/except</code>.</li>
+      <li>Сравнивает с правильным ответом (4).</li>
+      <li>Считает и печатает время работы.</li>
+    </ol>
+  </div>
+
+  <h3>🔍 Разбор по шагам</h3>
+
+  <div class="step">
+    <div class="num">1</div>
+    <div class="body">
+      <p><strong>Импорт времени и старт.</strong></p>
+      <div class="code">from time import *
+start = time()</div>
+      <p><code class="inl">time()</code> возвращает текущее время в секундах (дробное число).</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">2</div>
+    <div class="body">
+      <p><strong>Вывод вопроса и фактов.</strong></p>
+      <div class="code">print('Укажи номер ложного факта о человеческом теле')
+print('1-Смеяться и чувствовать щекотку одновременно невозможно')
+print('2-Человеческий волос живёт от 2 до 5 лет')
+print('3-Чтобы сделать 1 шаг, нужно задействовать 200 мышц')
+print('4-У далёкого предка человека 6 пальцев')</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">3</div>
+    <div class="body">
+      <p><strong>Ввод с защитой — снова шаблон из темы try/except.</strong></p>
+      <div class="code">while True:
+   try:
+       answer = int(input())
+       break
+   except:
+       print('Ошибка! Введите номер без других символов')</div>
+      <p>Работает точно так же, как разобрано на странице «try/except».</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">4</div>
+    <div class="body">
+      <p><strong>Проверка ответа.</strong></p>
+      <div class="code">if answer == 4:
+   print('Именно так!')
+else:
+   print('Нет, у человека никогда не было 6 пальцев')</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">5</div>
+    <div class="body">
+      <p><strong>Финиш времени и вывод.</strong></p>
+      <div class="code">end = time()
+print('Время работы программы', end - start)</div>
+      <p>Разница <code class="inl">end - start</code> — сколько секунд работала программа.</p>
+    </div>
+  </div>
+
+  <div class="card try">
+    <span class="badge red">Проверь себя</span>
+    <p>Что будет, если ввести <code class="inl">4</code>? А <code class="inl">один</code>?</p>
+    <details><summary style="cursor:pointer;color:#991b1b;font-weight:700;">Ответ</summary>
+      <p style="margin-top:.5rem;">При <code class="inl">4</code> — «Именно так!». При <code class="inl">один</code> — сработает <code class="inl">except</code>, программа попросит ввести номер заново.</p>
+    </details>
+  </div>
+
+  <div class="hint">
+    <strong>💡 Мелочь, но важно:</strong> <code class="inl">from time import *</code> импортирует всё из модуля. Лучше писать <code class="inl">import time</code> и потом <code class="inl">time.time()</code> — но в учебных задачах часто пишут как в примере.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Разборы подготовлены для самостоятельного решения. Пробуй, ошибайся, исправляй — так и учишься.
+</footer>
+
+<script>
+  /* ===== Навигация по страницам ===== */
+  const buttons = document.querySelectorAll('#nav button');
+  const pages = document.querySelectorAll('.page');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.page;
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      pages.forEach(p => p.classList.remove('active'));
+      document.getElementById(target).classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+
+  /* ===== Защита от копирования ===== */
+  document.addEventListener('DOMContentLoaded', () => {
+
+    // 1. Блоки кода нельзя выделять мышью
+    document.querySelectorAll('.code').forEach(el => {
+      el.addEventListener('selectstart', e => e.preventDefault());
+      el.addEventListener('mousedown', e => e.preventDefault());
+      el.addEventListener('dragstart', e => e.preventDefault());
+      el.addEventListener('copy', e => e.preventDefault());
+      el.addEventListener('cut', e => e.preventDefault());
+      el.addEventListener('contextmenu', e => e.preventDefault());
+    });
+
+    // 2. Запрет копирования / вырезания по Ctrl+C / Ctrl+X
+    document.addEventListener('copy', e => {
+      e.preventDefault();
+      return false;
+    });
+    document.addEventListener('cut', e => {
+      e.preventDefault();
+      return false;
+    });
+
+    // 3. Запрет выделения всего через Ctrl+A
+    document.addEventListener('keydown', e => {
+      const key = e.key.toLowerCase();
+      // Ctrl+A — выделить всё
+      if ((e.ctrlKey || e.metaKey) && key === 'a') {
+        e.preventDefault();
+        return false;
+      }
+      // Ctrl+C / Ctrl+X / Ctrl+U / Ctrl+S — отключим
+      if ((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'x' || key === 'u' || key === 's')) {
+        e.preventDefault();
+        return false;
+      }
+      // F12 — инструменты разработчика
+      if (key === 'f12') {
+        e.preventDefault();
+        return false;
+      }
+      // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','j','c'].includes(key)) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
+    // 4. Запрет правого клика по всей странице
+    document.addEventListener('contextmenu', e => {
+      // Разрешим правый клик внутри <input>, если появятся
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      e.preventDefault();
+      return false;
+    });
+
+    // 5. Запрет перетаскивания блоков кода
+    document.querySelectorAll('.code').forEach(el => {
+      el.setAttribute('draggable', 'false');
+    });
+  });
+</script>
+</body>
+</html>
